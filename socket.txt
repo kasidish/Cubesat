@@ -27,11 +27,15 @@ B4	5V_USB_STACK (optional/NC) send 5V from charge (if you don't use it, leave it
 B5	GND_STACK	ground
 B6	3V3_STACK	add pin 3.3V again
 B7	GND_STACK	ground
-B8	SPI_SCK (spare)	for sensor board
-B9	SPI_MOSI (spare)	for sensor board
-B10	SPI_MISO (spare)	for sensor board
-B11	SPI_CS1 (spare)	for sensor board
-B12	SPI_CS2 (spare)	for sensor board
-B13	INT1 (spare) interrupt from sensor/RTC
-B14	INT2 (spare) interrupt
+B8	SPI_SCK (spare)	for sensor board // GPIO36 / 35 / 12
+B9	SPI_MOSI (spare) for sensor board // GPIO35 / 37
+B10	SPI_MISO (spare) for sensor board // GPIO37 / 38
+B11	SPI_CS1 (spare)	for sensor board // GPIO10 / 11 / 14
+B12	SPI_CS2 (spare)	for sensor board // GPIO9 / 15
+B13	INT1 (spare) interrupt from sensor/RTC // GPIO4 / 5 / 6
+B14	INT2 (spare) interrupt // GPIO7 / 8
 B15	GPIO spare / SYS_RST (optional)	reset or other signal
+
+* cant use :
+GPIO19/20 (USB)
+GPIO43/44 (UART0)
