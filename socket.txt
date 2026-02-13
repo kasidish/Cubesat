@@ -11,8 +11,8 @@ A6	3V3_STACK	3.3V from Powerboard send to all board
 A7	GND_STACK	ground
 A8	3V3_STACK	parallel add current
 A9	GND_STACK	ground
-A10	I2C_SDA (GPIO1)	go to INA226/RTC/sensor
-A12	I2C_SCL (GPIO2)	go to INA226/RTC/sensor
+A10	I2C_SCL (GPIO2)	go to INA226/RTC/sensor
+A12	I2C_SDA (GPIO1)	go to INA226/RTC/sensor
 A11	GPS_RX (GPIO21)	ESP receive data (connect to GPS TX)
 A13	GPS_TX (GPIO47)	ESP send (connect to GPS RX)
 A14	PWR_EN / BUCK_EN (optional) command to open/close buck or open system (if you want)
