@@ -4,10 +4,12 @@
   #include "esp_camera.h"
   #include <FS.h>
   #include <SD_MMC.h>
+  #include "Wire.h"
 
   #include "INA226.h"
   #include <TinyGPS++.h>
   #include <RTClib.h>
+  #include "esp_heap_caps.h"
 
   // FEATURE SWITCHES MODE 0 = OFF UNABLE MODE 1 = ON ENABLE
   #define ENABLE_WIFI    1
@@ -22,8 +24,8 @@
   const char* password = "12345678";
 
   // I2C (INA226 + RTC)
-  #define I2C_SDA 1
-  #define I2C_SCL 2
+  #define I2C_SDA 41
+  #define I2C_SCL 42
 
   #define INA_IN_ADDR  0x40
   #define INA_OUT_ADDR 0x41
@@ -39,9 +41,6 @@
   static const int GPS_TX_PIN = 47;  // GPS RX <- ESP TX
   HardwareSerial gpsSerial(1);
   TinyGPSPlus gps;
-
-  // ADC (SENSOR 0-3.3V)
-  #define SENSOR_ADC_PIN 3
 
   // SD_MMC 1-bit
   #define SD_MMC_CMD 38
@@ -125,6 +124,23 @@
     }
     return true;
   #endif
+
+  auto dumpMem = [](const char* tag){
+  Serial.printf("[%s] heap=%u, dma=%u\n",
+    tag,
+    ESP.getFreeHeap(),
+    heap_caps_get_free_size(MALLOC_CAP_DMA));
+  };
+
+  dumpMem("boot");
+  #if ENABLE_SD
+    initSDMMC_1bit();
+    dumpMem("after SD");
+  #endif
+  #if ENABLE_CAMERA
+    initCamera();
+    dumpMem("after CAM");
+  #endif
   }
 
   // init camare setting configuration
@@ -154,7 +170,7 @@
     config.pixel_format = PIXFORMAT_JPEG;
 
     if (psramFound()) {
-      config.frame_size   = FRAMESIZE_VGA; // 640x480
+      config.frame_size   = FRAMESIZE_VGA; // 640*480
       config.jpeg_quality = 12; // 10-14
       config.fb_count     = 2;
       config.grab_mode    = CAMERA_GRAB_LATEST;
@@ -485,37 +501,56 @@
   #endif
   }
 
-  // ADC Seria plotter graph
-  void taskAnalogPlot(void* pv) {
-  (void)pv;
-  for (;;) {
-    uint32_t mv = analogReadMilliVolts(SENSOR_ADC_PIN);
-    float v = mv / 1000.0f;
-
-    Serial.printf("sensorV:%.3f\n", v);  // Serial Plotter
-
-    vTaskDelay(pdMS_TO_TICKS(50)); // 20Hz
+  void i2cScan() {
+    Serial.println("I2C scan...");
+    uint8_t count = 0;
+    for (uint8_t addr = 1; addr < 127; addr++) {
+      Wire.beginTransmission(addr);
+      if (Wire.endTransmission() == 0) {
+        Serial.printf("Found: 0x%02X\n", addr);
+        count++;
+      }
+      delay(2);
+    }
+    Serial.printf("Done. Found %u device(s)\n", count);
   }
-}
 
   // SETUP
   void setup() {
     Serial.begin(115200);
-    delay(300);
+    Wire.begin(41, 4);
+    Wire.setClock(100000);
+    delay(1000);
     Serial.println("\n--- ESP32-S3 CAM + SD_MMC + Web (Modular) ---");
+    Serial.printf("psramFound=%d, PSRAM size=%u\n", psramFound(), ESP.getPsramSize());
+    i2cScan();
 
     sdMutex = xSemaphoreCreateMutex();
     camMutex = xSemaphoreCreateMutex();
     latestMutex = xSemaphoreCreateMutex();
     dataQueue = xQueueCreate(10, sizeof(MeasurementData));
 
-    Wire.begin(I2C_SDA, I2C_SCL);
-
-    analogReadResolution(12);
-    analogSetPinAttenuation(SENSOR_ADC_PIN, ADC_11db);
-
   #if ENABLE_RTC
-    rtcOK = rtc.begin();
+  rtcOK = rtc.begin();
+  Serial.printf("rtc.begin() = %d\n", rtcOK);
+
+  if (rtcOK) {
+    if (rtc.lostPower()) {
+      Serial.println("RTC lost power -> setting time from compile time");
+      rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    }
+
+    DateTime now = rtc.now();
+    Serial.printf("RTC now: %04d-%02d-%02d %02d:%02d:%02d\n",
+      now.year(), now.month(), now.day(),
+      now.hour(), now.minute(), now.second());
+
+    delay(2000);
+    DateTime now2 = rtc.now();
+    Serial.printf("RTC +2s: %04d-%02d-%02d %02d:%02d:%02d\n",
+      now2.year(), now2.month(), now2.day(),
+      now2.hour(), now2.minute(), now2.second());
+  }
   #endif
 
   #if ENABLE_GPS
@@ -533,17 +568,13 @@
     }
   #endif
 
-  #if ENABLE_SD
-    if (!initSDMMC_1bit()) {
-      Serial.println("SD init failed");
-    }
-  #endif
-
   #if ENABLE_CAMERA
-    if (!initCamera()) {
-      Serial.println("Camera init failed");
-    }
-  #endif
+  if (!initCamera()) Serial.println("Camera init failed");
+#endif
+
+#if ENABLE_SD
+  if (!initSDMMC_1bit()) Serial.println("SD init failed");
+#endif
 
   #if ENABLE_WIFI
     WiFi.mode(WIFI_AP);
@@ -561,7 +592,6 @@
 
     xTaskCreatePinnedToCore(taskDataCollector, "DataCollector", 4096, NULL, 2, NULL, 0);
     xTaskCreatePinnedToCore(taskSDLogger,      "SDLogger",      4096, NULL, 1, NULL, 0);
-    xTaskCreatePinnedToCore(taskAnalogPlot,    "AnalogPlot"   , 2048, NULL, 1, NULL, 0);
     xTaskCreatePinnedToCore(taskCamera,        "CameraTask",    8192, NULL, 1, NULL, 1);
   }
 
