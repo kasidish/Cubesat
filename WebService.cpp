@@ -62,7 +62,9 @@ void WebService::handleJSON() {
     j += "\"pout\":" + String(d.pout, 6) + ",";
     j += "\"eff\":" + String(d.efficiency, 2) + ",";
     j += "\"lat\":" + String(d.lat, 6) + ",";
-    j += "\"lng\":" + String(d.lng, 6);
+    j += "\"lng\":" + String(d.lng, 6) + ",";
+    j += "\"adc_val\":" + String(d.adcValue) + ",";
+    j += "\"adc_v\":" + String(d.adcVoltage, 2);
     j += "}";
     server.send(200, "application/json", j);
 }

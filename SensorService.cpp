@@ -29,6 +29,8 @@ void SensorService::begin() {
     gpsSerial.begin(9600, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
 #endif
 
+    pinMode(SENSOR_ADC_PIN, INPUT);
+
     xTaskCreatePinnedToCore(SensorService::task, "SensorTask", 4096, this, 2, NULL, 0);
 }
 
@@ -74,6 +76,11 @@ void SensorService::loop() {
         d.lng = gps.location.lng();
     }
 #endif
+
+    // ADC Reading (0-3.3V approx, depending on attenuation)
+    // ESP32 ADC is 12-bit (0-4095)
+    d.adcValue = analogRead(SENSOR_ADC_PIN);
+    d.adcVoltage = (d.adcValue / 4095.0f) * 3.3f; // Basic calibration
 
     // Update local protected copy
     if (xSemaphoreTake(mutex, pdMS_TO_TICKS(50)) == pdTRUE) {

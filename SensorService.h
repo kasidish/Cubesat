@@ -15,6 +15,9 @@
 #define GPS_RX_PIN 21
 #define GPS_TX_PIN 47
 
+// ADC Pin
+#define SENSOR_ADC_PIN 3
+
 class SensorService {
 public:
     SensorService();

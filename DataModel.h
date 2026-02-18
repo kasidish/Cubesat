@@ -18,6 +18,8 @@ struct MeasurementData {
     float vout, iout, pout;
     float efficiency;
     double lat, lng;
+    int adcValue;
+    float adcVoltage;
 };
 
 #endif
