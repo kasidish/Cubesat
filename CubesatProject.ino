@@ -20,7 +20,7 @@
   #define ENABLE_GPS     0
 
   // WiFi
-  const char* ssid = "ESP32S3-CAM";
+  const char* ssid = "ESP32S3-CAM-KASIDISH";
   const char* password = "12345678";
 
   // I2C (INA226 + RTC)
