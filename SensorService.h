@@ -12,8 +12,8 @@
 #define I2C_SCL 42
 
 // GPS Pins
-#define GPS_RX_PIN 21
-#define GPS_TX_PIN 47
+#define GPS_RX_PIN 21 // GPS TX -> ESP RX
+#define GPS_TX_PIN 47 // GPS RX -> ESP TX
 
 // ADC Pin
 #define SENSOR_ADC_PIN 3
@@ -29,7 +29,7 @@ private:
     void loop();
     void makeTimestamp(char* out, size_t outSize);
 
-    INA226 ina_in;
+    INA226 ina_in; // 0x40
     INA226 ina_out; // 0x41
     RTC_DS3231 rtc;
     TinyGPSPlus gps;
