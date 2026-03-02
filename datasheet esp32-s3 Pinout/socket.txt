@@ -37,10 +37,10 @@ B14 (29) INT2 (spare) interrupt // GPIO7 / 8
 B15 (30) GPIO spare / SYS_RST (optional)	reset or other signal
 
 GPIO1,2,3,14 for Sensor board ADC :
-pin 37 : GPIO14 (ADC)
-pin 38 : GPIO1 (ADC)
-pin 39 : GPIO2 (ADC)
-pin 40 : GPIO3 (ADC)
+pin 37 : GPIO3 (ADC)
+pin 38 : GPIO2 (ADC)
+pin 39 : GPIO14 (ADC)
+pin 40 : GPIO1 (ADC)
 
 * cant use :
 GPIO43/44 (UART0)
