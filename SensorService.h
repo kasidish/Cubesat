@@ -15,8 +15,8 @@
 #define GPS_RX_PIN 21 // GPS TX -> ESP RX
 #define GPS_TX_PIN 47 // GPS RX -> ESP TX
 
-// ADC Pin
-#define SENSOR_ADC_PIN 3
+// ADC Pins
+const int ADC_PINS[4] = {3, 14, 1, 2};
 
 class SensorService {
 public:
@@ -41,6 +41,10 @@ private:
     MeasurementData latest;
     SemaphoreHandle_t mutex;
     QueueHandle_t* dataQueuePtr; // Pointer to the main queue
+    
+    // Runtime re-check / filter state
+    float adcFiltered[4];
+    unsigned long bootTimeMs;
     
 public:
     void setDataQueue(QueueHandle_t* q) { dataQueuePtr = q; }

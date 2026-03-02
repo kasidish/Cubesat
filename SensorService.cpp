@@ -1,9 +1,12 @@
 #include "SensorService.h"
 
 SensorService::SensorService() 
-    : ina_in(0x40), ina_out(0x41), gpsSerial(1), inaOK(false), rtcOK(false), dataQueuePtr(nullptr) {
+    : ina_in(0x40), ina_out(0x41), gpsSerial(1), inaOK(false), rtcOK(false), dataQueuePtr(nullptr), bootTimeMs(0) {
     mutex = xSemaphoreCreateMutex();
     memset(&latest, 0, sizeof(MeasurementData));
+    for (int i = 0; i < 4; i++) {
+        adcFiltered[i] = -1.0f;
+    }
 }
 
 void SensorService::begin() {
@@ -29,7 +32,10 @@ void SensorService::begin() {
     gpsSerial.begin(9600, SERIAL_8N1, GPS_RX_PIN, GPS_TX_PIN);
 #endif
 
-    pinMode(SENSOR_ADC_PIN, INPUT);
+    for (int i = 0; i < 4; i++) {
+        pinMode(ADC_PINS[i], INPUT);
+    }
+    bootTimeMs = millis();
 
     xTaskCreatePinnedToCore(SensorService::task, "SensorTask", 4096, this, 2, NULL, 0);
 }
@@ -77,10 +83,38 @@ void SensorService::loop() {
     }
 #endif
 
-    // ADC Reading (0-3.3V approx, depending on attenuation)
-    // ESP32 ADC is 12-bit (0-4095)
-    d.adcValue = analogRead(SENSOR_ADC_PIN);
-    d.adcVoltage = (d.adcValue / 4095.0f) * 3.3f; // Basic calibration
+    // ADC Reading and Filtering
+    float alpha = (millis() - bootTimeMs < 300000) ? 0.05f : 0.2f; // 5 min slow EMA, then fast EMA
+
+    for (int i = 0; i < 4; i++) {
+        int raw = analogRead(ADC_PINS[i]);
+        if (adcFiltered[i] < 0.0f) {
+            adcFiltered[i] = raw; // Init on first read
+        } else {
+            adcFiltered[i] = (alpha * raw) + ((1.0f - alpha) * adcFiltered[i]);
+        }
+        
+        d.adcValues[i] = (int)adcFiltered[i];
+        d.adcVoltages[i] = (d.adcValues[i] / 4095.0f) * 3.3f; // ESP32 is 12-bit (0-4095)
+        
+        // Normalize 0V -> 1, 3.3V -> 0
+        d.adcNormalized[i] = 1.0f - (d.adcVoltages[i] / 3.3f);
+        if (d.adcNormalized[i] < 0.0f) d.adcNormalized[i] = 0.0f;
+        if (d.adcNormalized[i] > 1.0f) d.adcNormalized[i] = 1.0f;
+    }
+
+    // Battery Estimation using non-linear 2S curve
+    if (d.adcNormalized[0] > 0.05f) { 
+        d.estimatedBatteryPct = 70.0f + (d.adcNormalized[0] * 30.0f); 
+    } else if (d.adcNormalized[1] > 0.05f) { 
+        d.estimatedBatteryPct = 50.0f + (d.adcNormalized[1] * 20.0f);
+    } else if (d.adcNormalized[2] > 0.05f) { 
+        d.estimatedBatteryPct = 30.0f + (d.adcNormalized[2] * 20.0f);
+    } else if (d.adcNormalized[3] > 0.05f) { 
+        d.estimatedBatteryPct = 10.0f + (d.adcNormalized[3] * 20.0f);
+    } else { 
+        d.estimatedBatteryPct = d.adcNormalized[3] * 10.0f;
+    }
 
     // Update local protected copy
     if (xSemaphoreTake(mutex, pdMS_TO_TICKS(50)) == pdTRUE) {

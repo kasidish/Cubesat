@@ -20,7 +20,7 @@ bool TelemetryService::begin(QueueHandle_t* q, CameraService* cam) {
         if (!SD_MMC.exists("/datalog.csv")) {
              File f = SD_MMC.open("/datalog.csv", FILE_WRITE);
              if (f) {
-                 f.println("Timestamp,Vin(V),Iin(A),Pin(W),Vout(V),Iout(A),Pout(W),Efficiency(%),Latitude,Longitude,ADC_Raw,ADC_Volts");
+                 f.println("Timestamp,Vin(V),Iin(A),Pin(W),Vout(V),Iout(A),Pout(W),Efficiency(%),Latitude,Longitude,ADC_N0,ADC_N1,ADC_N2,ADC_N3,BatPct");
                  f.close();
              }
         }
@@ -55,13 +55,14 @@ void TelemetryService::logToSerial(const MeasurementData& d) {
     // Serial Studio format: /\*.*\*\// // (Comments)
     // Or just plain CSV lines if configured: %s,%.2f,...
     // Here we match the SD Card format which is usually compatible if headers match
-    Serial.printf("/*%s,%.3f,%.6f,%.6f,%.3f,%.6f,%.6f,%.2f,%.6f,%.6f,%d,%.2f*/\n",
+    Serial.printf("/*%s,%.3f,%.6f,%.6f,%.3f,%.6f,%.6f,%.2f,%.6f,%.6f,%.2f,%.2f,%.2f,%.2f,%.1f*/\n",
         d.timestamp, 
         d.vin, d.iin, d.pin, 
         d.vout, d.iout, d.pout, 
         d.efficiency, 
         d.lat, d.lng,
-        d.adcValue, d.adcVoltage
+        d.adcNormalized[0], d.adcNormalized[1], d.adcNormalized[2], d.adcNormalized[3],
+        d.estimatedBatteryPct
     );
 }
 
@@ -70,13 +71,14 @@ void TelemetryService::logToSD(const MeasurementData& d) {
     if (xSemaphoreTake(sdMutex, pdMS_TO_TICKS(1000)) == pdTRUE) {
         File f = SD_MMC.open("/datalog.csv", FILE_APPEND);
         if (f) {
-            f.printf("%s,%.3f,%.6f,%.6f,%.3f,%.6f,%.6f,%.2f,%.6f,%.6f,%d,%.2f\n",
+            f.printf("%s,%.3f,%.6f,%.6f,%.3f,%.6f,%.6f,%.2f,%.6f,%.6f,%.2f,%.2f,%.2f,%.2f,%.1f\n",
                 d.timestamp, 
                 d.vin, d.iin, d.pin, 
                 d.vout, d.iout, d.pout, 
                 d.efficiency, 
                 d.lat, d.lng,
-                d.adcValue, d.adcVoltage
+                d.adcNormalized[0], d.adcNormalized[1], d.adcNormalized[2], d.adcNormalized[3],
+                d.estimatedBatteryPct
             );
             f.close();
         }

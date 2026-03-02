@@ -18,8 +18,10 @@ struct MeasurementData {
     float vout, iout, pout;
     float efficiency;
     double lat, lng;
-    int adcValue;
-    float adcVoltage;
+    int adcValues[4];
+    float adcVoltages[4];
+    float adcNormalized[4];
+    float estimatedBatteryPct;
 };
 
 #endif
