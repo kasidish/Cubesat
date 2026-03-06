@@ -70,22 +70,3 @@ Data Flow Diagram (Logical) :
  ↓                              ↓
 TelemtryService               WebService
  (Serial JSON)                 (HTTP API)
-
----
-
-## Node-RED Dashboard Configuration
-
-This project includes a pre-configured Node-RED flow to display telemetry data, calculate battery percentage, and control the operational modes of the Cubesat (Sensor Mode, Camera Mode, Sleep Mode).
-
-### How to Import the Flow:
-1. Open the file `nodered_flow.json` in this repository (or copy its contents directly).
-2. Open your Node-RED editor (usually `http://localhost:1880`).
-3. Click the menu button ☰ (top right corner).
-4. Select **Import**.
-5. Paste the JSON contents into the grey box.
-6. Click the red **Import** button.
-7. Place the new flow on your workspace and click the red **Deploy** button (top right corner).
-
-### Prerequisites:
-- Ensure you have the `node-red-dashboard` node installed via the Palette Manager (Menu > Manage palette > Install). Without this, the UI nodes will appear as unrecognized (`unknown: ui_...`).
-- The flow uses the public HiveMQ broker (`broker.hivemq.com`) on port `1883`. Ensure your ESP32 is configured to match this broker in `DataModel.h`.
