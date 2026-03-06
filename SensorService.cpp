@@ -60,6 +60,10 @@ void SensorService::task(void* param) {
 }
 
 void SensorService::loop() {
+    if (currentSystemMode != MODE_SENSOR) {
+        return; // Skip hardware reading and data generation
+    }
+
     MeasurementData d = {};
     makeTimestamp(d.timestamp, sizeof(d.timestamp));
 

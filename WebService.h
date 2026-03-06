@@ -23,6 +23,7 @@ private:
     void handleJPG();
     void handleCapture();
     void handleStatus();
+    void handleSetMode();
 };
 
 #endif

@@ -43,7 +43,9 @@ bool CameraService::begin() {
 }
 
 void CameraService::triggerCapture() {
-    captureRequested = true;
+    if (currentSystemMode == MODE_CAMERA) {
+        captureRequested = true;
+    }
 }
 
 bool CameraService::isCaptureRequested() {
@@ -58,6 +60,9 @@ camera_fb_t* CameraService::getFrame() {
 #if !ENABLE_CAMERA
     return nullptr;
 #endif
+    if (currentSystemMode != MODE_CAMERA) {
+        return nullptr;
+    }
     if (xSemaphoreTake(mutex, pdMS_TO_TICKS(1000)) != pdTRUE) {
         return nullptr;
     }

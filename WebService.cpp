@@ -7,16 +7,23 @@ void WebService::begin(SensorService* s, CameraService* c) {
     camera = c;
 
 #if ENABLE_WIFI
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP("ESP32S3-CAM", "12345678");
-    Serial.print("AP IP: ");
-    Serial.println(WiFi.softAPIP());
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    Serial.print("Connecting to WiFi");
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("");
+    Serial.print("Connected! IP Address: ");
+    Serial.println(WiFi.localIP());
 
     server.on("/", HTTP_GET, std::bind(&WebService::handleRoot, this));
     server.on("/json", HTTP_GET, std::bind(&WebService::handleJSON, this));
     server.on("/jpg", HTTP_GET, std::bind(&WebService::handleJPG, this));
     server.on("/capture", HTTP_GET, std::bind(&WebService::handleCapture, this));
     server.on("/status", HTTP_GET, std::bind(&WebService::handleStatus, this)); // Plain text
+    server.on("/setMode", HTTP_GET, std::bind(&WebService::handleSetMode, this));
 
     server.begin();
     Serial.println("WebService started");
@@ -36,6 +43,12 @@ void WebService::handleRoot() {
     html += "<style>body{background:#111;color:#eee;font-family:sans-serif;text-align:center;} img{max-width:100%;}</style>";
     html += "</head><body>";
     html += "<h1>Cubesat Dashboard</h1>";
+    html += "<p>Mode: <span id='mode_str'>Loading...</span></p>";
+    html += "<div style='margin-bottom: 20px;'>";
+    html += "<button onclick=\"fetch('/setMode?m=sensor')\">Sensor Mode</button> ";
+    html += "<button onclick=\"fetch('/setMode?m=camera')\">Camera Mode</button> ";
+    html += "<button onclick=\"fetch('/setMode?m=sleep')\">Sleep</button>";
+    html += "</div>";
     html += "<img id='cam' src='/jpg' /><br/><br/>";
     html += "<button onclick=\"fetch('/capture')\">Capture to SD</button> ";
     html += "<button onclick=\"document.getElementById('cam').src='/jpg?t='+Date.now()\">Refresh</button>";
@@ -43,6 +56,7 @@ void WebService::handleRoot() {
     html += "<script>setInterval(async()=>{";
     html += "  const r=await fetch('/json');const d=await r.json();";
     html += "  document.getElementById('data').innerText = JSON.stringify(d,null,2);";
+    html += "  document.getElementById('mode_str').innerText = d.mode_str;";
     html += "},2000);</script>";
     html += "</body></html>";
     server.send(200, "text/html", html);
@@ -53,6 +67,8 @@ void WebService::handleJSON() {
     MeasurementData d = sensors->getLatestData();
 
     String j = "{";
+    j += "\"mode\":" + String(currentSystemMode) + ",";
+    j += "\"mode_str\":\"" + String(currentSystemMode == MODE_SENSOR ? "Sensor" : currentSystemMode == MODE_CAMERA ? "Camera" : "Sleep") + "\",";
     j += "\"ts\":\"" + String(d.timestamp) + "\",";
     j += "\"vin\":" + String(d.vin, 3) + ",";
     j += "\"iin\":" + String(d.iin, 6) + ",";
@@ -100,4 +116,28 @@ void WebService::handleCapture() {
 
 void WebService::handleStatus() {
     handleJSON(); // Reuse JSON for status
+}
+
+void WebService::handleSetMode() {
+    if (server.hasArg("m")) {
+        String md = server.arg("m");
+        md.toLowerCase();
+        if (md == "sensor") {
+            currentSystemMode = MODE_SENSOR;
+            Serial.println("Web: Switched to SENSOR MODE");
+            server.send(200, "text/plain", "Mode set to Sensor");
+            return;
+        } else if (md == "camera") {
+            currentSystemMode = MODE_CAMERA;
+            Serial.println("Web: Switched to CAMERA MODE");
+            server.send(200, "text/plain", "Mode set to Camera");
+            return;
+        } else if (md == "sleep" || md == "wakeup") {
+            currentSystemMode = (md == "sleep") ? MODE_SLEEP : MODE_SENSOR;
+            Serial.println("Web: Switched to " + String(md));
+            server.send(200, "text/plain", "Mode set to " + String(md));
+            return;
+        }
+    }
+    server.send(400, "text/plain", "Invalid mode parameter");
 }

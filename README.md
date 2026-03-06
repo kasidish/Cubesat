@@ -21,7 +21,8 @@ Runtime Flow (FreeRTOS) :
 
 1. main.cpp
    - Initialize Serial (115200)
-   - Initialize WiFi (AP Mode / Station Mode)
+   - Initialize WiFi (STA Mode for MQTT/Web, AP Mode for configuration)
+   - Initialize MQTT (connect to HiveMQ)
    - Create SharedData (with Mutex for thread safety)
    - Create Tasks:
      - SensorService (Priority 2, Core 1)
