@@ -84,22 +84,22 @@ Modes are controlled via the web dashboard, or remotely via MQTT command topic `
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        CORE 0 (Hardware)                            │
 │                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐   │
+│  ┌──────────────────────────────────────────────────────────────┐   │
 │  │ SensorTask (Priority 2)                                      │   │
-│  │  1. Read INA226, GPS, RTC, 4x ADC (EMA filter)              │   │
+│  │  1. Read INA226, GPS, RTC, 4x ADC (EMA filter)               │   │
 │  │  2. Update latest data (Mutex protected)                     │   │
 │  │  3. Push MeasurementData to FreeRTOS Queue                   │   │
 │  │  4. Sleep 1000ms  →  repeat                                  │   │
-│  └─────────────────────┬───────────────────────────────────────┘   │
-│                        │ (Queue)                                     │
-│  ┌─────────────────────▼───────────────────────────────────────┐   │
+│  └─────────────────────┬────────────────────────────────────────┘   │
+│                        │ (Queue)                                    │
+│  ┌─────────────────────▼────────────────────────────────────────┐   │
 │  │ TelemetryTask (Priority 1)                                   │   │
 │  │  1. Pop MeasurementData from Queue                           │   │
 │  │  2. Write CSV row to /datalog.csv on SD Card                 │   │
-│  │     (Timestamp, Mode, INA226, GPS, Satellites, SNR, ADC×4)  │   │
+│  │     (Timestamp, Mode, INA226, GPS, Satellites, SNR, ADC×4)   │   │
 │  │  3. Print /* ... */ to Serial (Serial Studio compatible)     │   │
 │  │  4. If capture requested → save /photos/img_DATE_Time_TIME   │   │
-│  └─────────────────────────────────────────────────────────────┘   │
+│  └──────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -113,9 +113,9 @@ Modes are controlled via the web dashboard, or remotely via MQTT command topic `
 │   │    ├── GET /capture      → Trigger photo to SD                  │
 │   │    └── GET /setMode?m=   → Change operation mode                │
 │   │                                                                 │
-│   └── MqttService::update()  → keep-alive + publish                │
-│        ├── Publish to cubesat/telemetry  (every 5s)                │
-│        └── Subscribe cubesat/command    (mode control)             │
+│   └── MqttService::update()  → keep-alive + publish                 │
+│        ├── Publish to cubesat/telemetry  (every 5s)                 │
+│        └── Subscribe cubesat/command    (mode control)              │
 └─────────────────────────────────────────────────────────────────────┘
 
          SoftAP ──────────────────────────────► Browser (192.168.4.1)
