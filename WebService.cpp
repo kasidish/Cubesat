@@ -126,7 +126,9 @@ void WebService::handleRoot() {
     html += "    document.getElementById('st_nr').innerText = d.mqtt_connected ? 'Connected (via MQTT)' : 'Disconnected';";
     html += "    document.getElementById('st_gps').innerText = d.satellites;";
     html += "    document.getElementById('st_snr').innerText = d.snr || '-';";
-    html += "    document.getElementById('st_bat').innerText = d.vin ? (d.vin.toFixed(2) + 'V') : 'N/A';";
+    html += "    var batStr = d.vin ? (d.vin.toFixed(2) + 'V') : 'N/A';";
+    html += "    if(d.batt_soc !== undefined) batStr += ' | ' + d.batt_soc.toFixed(1) + '%';";
+    html += "    document.getElementById('st_bat').innerText = batStr;";
     html += "  } catch(e) {}";
     html += "},2000);</script>";
     html += "</body></html>";
@@ -155,6 +157,7 @@ void WebService::handleJSON() {
     j += "\"lng\":" + String(d.lng, 6) + ",";
     j += "\"satellites\":" + String(d.satellites) + ",";
     j += "\"snr\":\"" + String(d.snrData) + "\",";
+    j += "\"batt_soc\":" + String(d.battSoC, 2) + ",";
     j += "\"adc0\":" + String(d.adcValues[0]) + ",";
     j += "\"adc1\":" + String(d.adcValues[1]) + ",";
     j += "\"adc2\":" + String(d.adcValues[2]) + ",";

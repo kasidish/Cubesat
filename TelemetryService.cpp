@@ -20,7 +20,7 @@ bool TelemetryService::begin(QueueHandle_t* q, CameraService* cam) {
         if (!SD_MMC.exists("/datalog.csv")) {
              File f = SD_MMC.open("/datalog.csv", FILE_WRITE);
              if (f) {
-                 f.println("Timestamp,Mode,Vin(V),Iin(A),Pin(W),Vout(V),Iout(A),Pout(W),Efficiency(%),Latitude,Longitude,Satellites,SNR,ADC0,ADC1,ADC2,ADC3");
+                 f.println("Timestamp,Mode,Vin(V),Iin(A),Pin(W),Vout(V),Iout(A),Pout(W),Efficiency(%),Latitude,Longitude,Satellites,SNR,ADC0,ADC1,ADC2,ADC3,SoC(%)");
                  f.close();
              }
         }
@@ -54,14 +54,14 @@ void TelemetryService::loop() {
 void TelemetryService::logToSerial(const MeasurementData& d) {
     const char* modeStr = (currentSystemMode == MODE_SENSOR) ? "SENSOR" :
                           (currentSystemMode == MODE_CAMERA) ? "CAMERA" : "SLEEP";
-    Serial.printf("/*%s,%s,%.3f,%.6f,%.6f,%.3f,%.6f,%.6f,%.2f,%.6f,%.6f,%d,%s,%d,%d,%d,%d*/\n",
+    Serial.printf("/*%s,%s,%.3f,%.6f,%.6f,%.3f,%.6f,%.6f,%.2f,%.6f,%.6f,%d,%s,%d,%d,%d,%d,%.2f*/\n",
         d.timestamp, modeStr,
         d.vin, d.iin, d.pin,
         d.vout, d.iout, d.pout,
         d.efficiency,
         d.lat, d.lng,
         d.satellites, d.snrData,
-        d.adcValues[0], d.adcValues[1], d.adcValues[2], d.adcValues[3]
+        d.adcValues[0], d.adcValues[1], d.adcValues[2], d.adcValues[3], d.battSoC
     );
 }
 
@@ -72,14 +72,14 @@ void TelemetryService::logToSD(const MeasurementData& d) {
         if (f) {
             const char* modeStr = (currentSystemMode == MODE_SENSOR) ? "SENSOR" :
                                   (currentSystemMode == MODE_CAMERA) ? "CAMERA" : "SLEEP";
-            f.printf("%s,%s,%.3f,%.6f,%.6f,%.3f,%.6f,%.6f,%.2f,%.6f,%.6f,%d,%s,%d,%d,%d,%d\n",
+            f.printf("%s,%s,%.3f,%.6f,%.6f,%.3f,%.6f,%.6f,%.2f,%.6f,%.6f,%d,%s,%d,%d,%d,%d,%.2f\n",
                 d.timestamp, modeStr,
                 d.vin, d.iin, d.pin,
                 d.vout, d.iout, d.pout,
                 d.efficiency,
                 d.lat, d.lng,
                 d.satellites, d.snrData,
-                d.adcValues[0], d.adcValues[1], d.adcValues[2], d.adcValues[3]
+                d.adcValues[0], d.adcValues[1], d.adcValues[2], d.adcValues[3], d.battSoC
             );
             f.close();
         }

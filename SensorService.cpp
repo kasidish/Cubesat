@@ -1,7 +1,9 @@
 #include "SensorService.h"
 
 SensorService::SensorService() 
-    : ina_in(0x41), ina_out(0x44), gpsSerial(1), inaInOK(false), inaOutOK(false), rtcOK(false), dataQueuePtr(nullptr), bootTimeMs(0), totalSatsInView(0) {
+    : ina_in(0x41), ina_out(0x44), gpsSerial(1), inaInOK(false), inaOutOK(false), rtcOK(false), 
+      dataQueuePtr(nullptr), bootTimeMs(0), totalSatsInView(0), 
+      socAccum(0.0f), lastSocMs(0), socInitialized(false) {
     mutex = xSemaphoreCreateMutex();
     nmeaSentence = "";
     snrDetails = "";
@@ -87,6 +89,9 @@ void SensorService::loop() {
     if (inaInOK && inaOutOK) {
         d.efficiency = (d.pin > 0.000001f) ? (d.pout / d.pin) * 100.0f : 0.0f;
     }
+    
+    // Update State of Charge
+    updateSoC(d);
 #endif
 
 #if ENABLE_GPS
@@ -174,6 +179,62 @@ void SensorService::loop() {
     if (dataQueuePtr && *dataQueuePtr) {
         xQueueSend(*dataQueuePtr, &d, pdMS_TO_TICKS(10));
     }
+}
+
+void SensorService::updateSoC(MeasurementData& d) {
+    unsigned long now = millis();
+    if (lastSocMs == 0) {
+        lastSocMs = now;
+        // First run: Init from voltage
+        d.battSoC = getSoCFromVoltage(d.vin);
+        socAccum = d.battSoC;
+        socInitialized = true;
+        Serial.printf("SoC Initialized from Voltage: %.2f%%\n", socAccum);
+        return;
+    }
+
+    float deltaSeconds = (now - lastSocMs) / 1000.0f;
+    lastSocMs = now;
+
+    // 1. Coulomb Counting
+    // getCurrent() returns Amps. Positive = Charging, Negative = Discharging (presumably)
+    // mAh = A * (sec/3600) * 1000
+    float deltaMAh = d.iin * (deltaSeconds / 3600.0f) * 1000.0f;
+    socAccum += (deltaMAh / BATT_CAPACITY_MAH) * 100.0f;
+
+    // 2. Voltage Correction (OCV)
+    // Only correct if current is very low (idle) to avoid voltage drop error
+    if (abs(d.iin) < OCV_IDLE_THRESHOLD) {
+        float ocvSoC = getSoCFromVoltage(d.vin);
+        // Slowly drift toward OCV to correct Coulomb Counting errors
+        socAccum = (socAccum * 0.98f) + (ocvSoC * 0.02f);
+    }
+
+    // Clamp
+    if (socAccum > 100.0f) socAccum = 100.0f;
+    if (socAccum < 0.0f) socAccum = 0.0f;
+
+    d.battSoC = socAccum;
+}
+
+float SensorService::getSoCFromVoltage(float v) {
+    // Li-ion 2S (8.4V Full, 6.0V Cutoff)
+    // Simple lookup table / linear interpolation
+    if (v >= 8.4f) return 100.0f;
+    if (v <= 6.0f) return 0.0f;
+
+    // Approximated discharge curve for Li-ion 2S
+    if (v > 8.1f) return 90.0f + (v - 8.1f) * (10.0f / 0.3f);
+    if (v > 7.9f) return 80.0f + (v - 7.9f) * (10.0f / 0.2f);
+    if (v > 7.7f) return 70.0f + (v - 7.7f) * (10.0f / 0.2f);
+    if (v > 7.5f) return 60.0f + (v - 7.5f) * (10.0f / 0.2f);
+    if (v > 7.3f) return 50.0f + (v - 7.3f) * (10.0f / 0.2f);
+    if (v > 7.1f) return 40.0f + (v - 7.1f) * (10.0f / 0.2f);
+    if (v > 6.9f) return 30.0f + (v - 6.9f) * (10.0f / 0.2f);
+    if (v > 6.7f) return 20.0f + (v - 6.7f) * (10.0f / 0.2f);
+    if (v > 6.4f) return 10.0f + (v - 6.4f) * (10.0f / 0.3f);
+    
+    return (v - 6.0f) * (10.0f / 0.4f);
 }
 
 void SensorService::makeTimestamp(char* out, size_t outSize) {

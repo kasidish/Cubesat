@@ -45,6 +45,7 @@ struct MeasurementData {
     double lat, lng;
     int satellites;
     int adcValues[4];
+    float battSoC; // Battery State of Charge (%)
 };
 
 // System Modes

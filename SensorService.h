@@ -11,6 +11,13 @@
 #define I2C_SDA 41
 #define I2C_SCL 42
 
+// SoC Config (Li-ion 2S 3200mAh)
+#define BATT_CAPACITY_MAH   3200.0f
+#define BATT_FULL_V         8.4f
+#define BATT_EMPTY_V        6.0f
+#define OCV_IDLE_THRESHOLD  0.050f  // A - below this is considered idle for OCV correction
+
+
 // GPS Pins
 #define GPS_RX_PIN 21 // GPS TX -> ESP RX
 #define GPS_TX_PIN 47 // GPS RX -> ESP TX
@@ -30,6 +37,9 @@ private:
     static void task(void* param);
     void loop();
     void makeTimestamp(char* out, size_t outSize);
+    void updateSoC(MeasurementData& d);
+    float getSoCFromVoltage(float voltage);
+
 
     INA226 ina_in; // 0x41
     INA226 ina_out; // 0x44
@@ -50,7 +60,11 @@ private:
     int totalSatsInView;
     String snrDetails;
 
-    // Runtime re-check / filter state
+    // SoC State
+    float socAccum;        // Current SoC %
+    unsigned long lastSocMs;
+    bool socInitialized;
+
     float adcFiltered[4];
     unsigned long bootTimeMs;
     

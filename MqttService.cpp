@@ -81,6 +81,7 @@ void MqttService::publishTelemetry() {
     j += "\"lng\":" + String(d.lng, 6) + ",";
     j += "\"satellites\":" + String(d.satellites) + ",";
     j += "\"snr\":\"" + String(d.snrData) + "\",";
+    j += "\"batt_soc\":" + String(d.battSoC, 2) + ",";
     j += "\"adc0\":" + String(d.adcValues[0]) + ",";
     j += "\"adc1\":" + String(d.adcValues[1]) + ",";
     j += "\"adc2\":" + String(d.adcValues[2]) + ",";
