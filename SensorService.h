@@ -58,7 +58,6 @@ private:
     // GPS NMEA Parsing State
     String nmeaSentence;
     int totalSatsInView;
-    String snrDetails;
 
     // SoC State
     float socAccum;        // Current SoC %

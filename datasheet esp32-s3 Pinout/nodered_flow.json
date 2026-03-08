@@ -247,7 +247,7 @@
         "width": 0,
         "height": 0,
         "label": "GPS Satellites",
-        "format": "{{msg.payload.satellites}} sats | SNR: {{msg.payload.snr || '-'}}",
+        "format": "{{msg.payload.satellites}} sats",
         "layout": "row-spread",
         "x": 610,
         "y": 220,

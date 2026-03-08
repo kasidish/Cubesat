@@ -95,9 +95,9 @@ Modes are controlled via the web dashboard, or remotely via MQTT command topic `
 │  ┌─────────────────────▼────────────────────────────────────────┐   │
 │  │ TelemetryTask (Priority 1)                                   │   │
 │  │  1. Pop MeasurementData from Queue                           │   │
-│  │  2. Write CSV row to /datalog.csv on SD Card                 │   │
-│  │     (Timestamp, Mode, INA226, GPS, Satellites, SNR, ADC×4)   │   │
-│  │  3. Print /* ... */ to Serial (Serial Studio compatible)     │   │
+│  │  2. Write CSV row to /datalog.csv on SD Card                 │
+│  │     (Timestamp, Mode, INA226, GPS, Satellites, ADC×4)        │
+│  │  3. Print /* ... */ to Serial (Serial Studio compatible)     │
 │  │  4. If capture requested → save /photos/img_DATE_Time_TIME   │   │
 │  └──────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
@@ -139,8 +139,9 @@ Sensors (INA226 / GPS / RTC / ADC)
 
 ### CSV Columns
 ```
-Timestamp, Mode, Vin(V), Iin(A), Pin(W), Vout(V), Iout(A), Pout(W),
-Efficiency(%), Latitude, Longitude, Satellites, SNR, ADC0, ADC1, ADC2, ADC3
+Timestamp, Mode, Vin(V), Iin(A), Pin(W), Vout(V), Iout(A), Pout(W), Efficiency(%),
+Latitude, Longitude, Satellites, ADC0, ADC1, ADC2, ADC3,
+SoC(%), adcSoC(%), Logic0, Logic1, Logic2, Logic3
 ```
 
 ---
@@ -193,10 +194,10 @@ Efficiency(%), Latitude, Longitude, Satellites, SNR, ADC0, ADC1, ADC2, ADC3
 
 ## Pin Reference
 
-| Peripheral | Pins |
+| Peripheral | Pins / GPIO |
 | --- | --- |
 | I2C (INA226, RTC) | SDA=41, SCL=42 |
 | GPS (UART) | RX=21, TX=47 |
-| ADC (socket order) | ADC0=Pin37, ADC1=Pin38, ADC2=Pin39, ADC3=Pin40 |
+| ADC (socket order) | ADC0=Pin37 (GPIO3), ADC1=Pin38 (GPIO2), ADC2=Pin39 (GPIO14), ADC3=Pin40 (GPIO1) |
 | SD Card (SD_MMC 1-bit) | CLK=39, CMD=38, D0=40 |
 | Camera | XCLK=15, SIOD=4, SIOC=5, Y2-Y9=11,9,8,10,12,18,17,16, VSYNC=6, HREF=7, PCLK=13 |

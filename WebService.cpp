@@ -94,7 +94,6 @@ void WebService::handleRoot() {
     html += "MQTT : <span id='st_mqtt'>Loading...</span><br/>";
     html += "Node-RED : <span id='st_nr'>Loading...</span><br/>";
     html += "GPS Sats : <span id='st_gps'>Loading...</span><br/>";
-    html += "GPS SNR : <span id='st_snr'>Loading...</span><br/>";
     html += "Battery : <span id='st_bat'>Loading...</span><br/>";
     html += "Mode : <span id='mode_str'>Loading...</span><br/>";
     html += "Backup Bat : <span id='st_adcsoc'>Loading...</span><br/>";
@@ -126,7 +125,6 @@ void WebService::handleRoot() {
     html += "    document.getElementById('st_mqtt').innerText = d.mqtt_connected ? 'Connected' : 'Disconnected';";
     html += "    document.getElementById('st_nr').innerText = d.mqtt_connected ? 'Connected (via MQTT)' : 'Disconnected';";
     html += "    document.getElementById('st_gps').innerText = d.satellites;";
-    html += "    document.getElementById('st_snr').innerText = d.snr || '-';";
     html += "    var batStr = d.vin ? (d.vin.toFixed(2) + 'V') : 'N/A';";
     html += "    if(d.batt_soc !== undefined) batStr += ' | ' + d.batt_soc.toFixed(1) + '%';";
     html += "    document.getElementById('st_bat').innerText = batStr;";
@@ -158,13 +156,12 @@ void WebService::handleJSON() {
     j += "\"lat\":" + String(d.lat, 6) + ",";
     j += "\"lng\":" + String(d.lng, 6) + ",";
     j += "\"satellites\":" + String(d.satellites) + ",";
-    j += "\"snr\":\"" + String(d.snrData) + "\",";
     j += "\"batt_soc\":" + String(d.battSoC, 2) + ",";
     j += "\"adc_soc\":" + String(d.adcSoC, 1) + ",";
-    j += "\"adc_l0\":" + String(d.adcLogic[0], 2) + ",";
-    j += "\"adc_l1\":" + String(d.adcLogic[1], 2) + ",";
-    j += "\"adc_l2\":" + String(d.adcLogic[2], 2) + ",";
-    j += "\"adc_l3\":" + String(d.adcLogic[3], 2) + ",";
+    j += "\"logic0\":" + String(d.logicLevels[0], 2) + ",";
+    j += "\"logic1\":" + String(d.logicLevels[1], 2) + ",";
+    j += "\"logic2\":" + String(d.logicLevels[2], 2) + ",";
+    j += "\"logic3\":" + String(d.logicLevels[3], 2) + ",";
     j += "\"adc0\":" + String(d.adcValues[0]) + ",";
     j += "\"adc1\":" + String(d.adcValues[1]) + ",";
     j += "\"adc2\":" + String(d.adcValues[2]) + ",";

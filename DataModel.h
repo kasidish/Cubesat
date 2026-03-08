@@ -21,8 +21,8 @@
 #define WIFI_PASS "Popeye@425"
 
 // WI-FI ENTERPRISE CONFIGURATION (WPA2 Ent)
-#define EAP_IDENTITY "67010040@kmit.ac.th"
-#define EAP_USERNAME "67010655@kmit.ac.th"
+#define EAP_IDENTITY "67010040@kmitl.ac.th"
+#define EAP_USERNAME "67010040@kmitl.ac.th"
 #define EAP_PASSWORD "Popeye@425"
 
 // MQTT CONFIGURATION
@@ -38,7 +38,6 @@
 
 struct MeasurementData {
     char timestamp[32];
-    char snrData[128];
     float vin, iin, pin;
     float vout, iout, pout;
     float efficiency;
@@ -47,7 +46,7 @@ struct MeasurementData {
     int adcValues[4];
     float battSoC; // Battery State of Charge (%)
     float adcSoC;  // Redundant SoC from comparator (%)
-    float adcLogic[4]; // Inverted logic (0.0=Inactive, 1.0=Active)
+    float logicLevels[4]; // Inverted logic (0.0=Inactive, 1.0=Active)
 };
 
 // System Modes
