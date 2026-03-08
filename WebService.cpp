@@ -1,6 +1,6 @@
 #include "WebService.h"
 #include "MqttService.h"
-#include "esp_wpa2.h"
+#include "esp_eap_client.h"
 
 WebService::WebService() : server(80), sensors(nullptr), camera(nullptr), mqtt(nullptr) {}
 
@@ -15,10 +15,10 @@ void WebService::begin(SensorService* s, CameraService* c, MqttService* m) {
 
 #if ENABLE_WIFI_ENTERPRISE
     WiFi.disconnect(true);
-    esp_wifi_sta_wpa2_ent_set_identity((uint8_t *)EAP_IDENTITY, strlen(EAP_IDENTITY));
-    esp_wifi_sta_wpa2_ent_set_username((uint8_t *)EAP_USERNAME, strlen(EAP_USERNAME));
-    esp_wifi_sta_wpa2_ent_set_password((uint8_t *)EAP_PASSWORD, strlen(EAP_PASSWORD));
-    esp_wifi_sta_wpa2_ent_enable();
+    esp_eap_client_set_identity((uint8_t *)EAP_IDENTITY, strlen(EAP_IDENTITY));
+    esp_eap_client_set_username((uint8_t *)EAP_USERNAME, strlen(EAP_USERNAME));
+    esp_eap_client_set_password((uint8_t *)EAP_PASSWORD, strlen(EAP_PASSWORD));
+    esp_eap_client_enable();
     WiFi.begin(WIFI_SSID); // For eduroam, SSID is often "eduroam"
 #else
     WiFi.begin(WIFI_SSID, WIFI_PASS);
