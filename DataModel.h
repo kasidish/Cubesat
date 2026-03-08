@@ -21,8 +21,8 @@
 #define WIFI_PASS "Popeye@425"
 
 // WI-FI ENTERPRISE CONFIGURATION (WPA2 Ent)
-#define EAP_IDENTITY "67010040@kmitl.ac.th"
-#define EAP_USERNAME "67010040@kmitl.ac.th"
+#define EAP_IDENTITY "67010655@kmit.ac.th"
+#define EAP_USERNAME "67010655@kmit.ac.th"
 #define EAP_PASSWORD "Popeye@425"
 
 // MQTT CONFIGURATION
@@ -38,6 +38,7 @@
 
 struct MeasurementData {
     char timestamp[32];
+    char snrData[128];
     float vin, iin, pin;
     float vout, iout, pout;
     float efficiency;
