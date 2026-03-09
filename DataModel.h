@@ -16,13 +16,13 @@
 #define ENABLE_GPS     1 // Set to 1 if hardware acts up
 
 // WI-FI CONFIGURATION (Standard WPA2 Personal)
-#define WIFI_SSID "eduroam"
-#define WIFI_PASS "Popeye@425"
+#define WIFI_SSID "TT :)"
+#define WIFI_PASS "0646908800"
 
 // WI-FI ENTERPRISE CONFIGURATION (WPA2 Ent)
-#define EAP_IDENTITY "67010655@kmit.ac.th"
-#define EAP_USERNAME "67010655@kmit.ac.th"
-#define EAP_PASSWORD "Popeye@425"
+#define EAP_IDENTITY "67010040@kmit.ac.th"
+#define EAP_USERNAME "67010040@kmit.ac.th"
+#define EAP_PASSWORD "Computer@2002"
 
 // MQTT CONFIGURATION
 #define MQTT_BROKER "broker.hivemq.com"
