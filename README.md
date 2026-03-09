@@ -11,9 +11,8 @@ The project uses Object-Oriented Design (OOD) where each hardware/functional blo
 | `DataModel.h` | Shared config (`ENABLE_*` switches), WiFi/MQTT credentials, `MeasurementData` struct, `OperationMode` enum |
 | `SensorService` | Reads INA226 (power), GPS (NMEA/TinyGPS++), RTC (DS3231), and 4x ADC channels with EMA filtering |
 | `TelemetryService` | Logs sensor data to SD Card (CSV) and Serial output; saves captured photos to SD |
-| `WebService` | Hosts the web dashboard (SoftAP + STA), live `/json` API, camera stream, and mode switching |
+| `WebService` | Hosts the web dashboard (SoftAP + STA), live `/json` API, and mode switching |
 | `MqttService` | Publishes telemetry to HiveMQ; receives remote mode commands |
-| `CameraService` | Manages the OV2640 camera module; provides frame access and capture triggering |
 
 ---
 
@@ -22,7 +21,6 @@ The project uses Object-Oriented Design (OOD) where each hardware/functional blo
 ### Feature Switches
 ```cpp
 #define ENABLE_WIFI            1
-#define ENABLE_CAMERA          1
 #define ENABLE_SD              1
 #define ENABLE_MQTT            1
 #define ENABLE_WIFI_ENTERPRISE 1  // 1 = WPA2 Enterprise (eduroam), 0 = WPA2 Personal

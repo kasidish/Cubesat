@@ -1,7 +1,7 @@
 #include "SensorService.h"
 
 SensorService::SensorService() 
-    : ina_in(0x41), ina_out(0x44), gpsSerial(1), inaInOK(false), inaOutOK(false), rtcOK(false), 
+    : ina_in(0x41), ina_out(0x51), gpsSerial(1), inaInOK(false), inaOutOK(false), rtcOK(false), 
       dataQueuePtr(nullptr), bootTimeMs(0), totalSatsInView(0), 
       socAccum(0.0f), lastSocMs(0), socInitialized(false) {
     mutex = xSemaphoreCreateMutex();

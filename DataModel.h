@@ -6,7 +6,6 @@
 
 // FEATURE SWITCHES
 #define ENABLE_WIFI    1
-#define ENABLE_CAMERA  0
 #define ENABLE_SD      1
 #define ENABLE_MQTT    1
 #define ENABLE_WIFI_ENTERPRISE 1 // Set to 1 to use WPA2 Enterprise (eduroam)

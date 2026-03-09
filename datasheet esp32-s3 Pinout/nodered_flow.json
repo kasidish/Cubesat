@@ -556,33 +556,6 @@
         ]
     },
     {
-        "id": "ui_btn_camera",
-        "type": "ui_button",
-        "z": "tab_cubesat",
-        "name": "Camera Mode",
-        "group": "ui_group_control",
-        "order": 2,
-        "width": 0,
-        "height": 0,
-        "passthru": false,
-        "label": "📷 Camera Mode",
-        "tooltip": "Switch ESP32 to Camera mode",
-        "color": "white",
-        "bgcolor": "#1a4a7a",
-        "icon": "",
-        "payload": "camera",
-        "payloadType": "str",
-        "topic": "topic",
-        "topicType": "msg",
-        "x": 180,
-        "y": 840,
-        "wires": [
-            [
-                "mqtt_out_command"
-            ]
-        ]
-    },
-    {
         "id": "ui_btn_sleep",
         "type": "ui_button",
         "z": "tab_cubesat",
