@@ -24,7 +24,7 @@
 
 // ADC Pins — ordered by physical socket: Pin37→38→39→40
 // ADC0=GPIO3(Pin37), ADC1=GPIO2(Pin38), ADC2=GPIO14(Pin39), ADC3=GPIO1(Pin40)
-const int ADC_PINS[4] = {3, 2, 14, 1};
+const int ADC_PINS[4] = {3, 2, 9, 1};
 
 class SensorService {
 public:
