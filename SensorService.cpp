@@ -9,7 +9,7 @@ SensorService::SensorService()
     memset(&latest, 0, sizeof(MeasurementData));
     for (int i = 0; i < 4; i++) {
         adcFiltered[i] = -1.0f;
-    }
+    }หแกไดไไ
 }
 
 void SensorService::begin() {
